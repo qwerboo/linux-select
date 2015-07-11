@@ -6,12 +6,8 @@
 #include <stdlib.h>  
 #include <stdio.h>  
 #include <errno.h>  
+#define MAXLEN 1024 
 #include "readwrie.h"
-#define MAXLEN 1024  
-  
-  
-
-  
   
 size_t readn(int fd, void *buf, size_t len)  
 {  
