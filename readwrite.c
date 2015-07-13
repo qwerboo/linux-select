@@ -9,55 +9,52 @@
 #define MAXLEN 1024 
 #include "readwrie.h"
   
-size_t readn(int fd, void *buf, size_t len)  
+ssize_t readn(int fd, void *buf, size_t len)  
 {  
 size_t left = len;  
-int ret;  
+ssize_t nread;  
 char *pbuf = (char *)buf;  
   
   
 while(left > 0)  
 {  
-ret = read(fd, pbuf, left);  
-if(ret < 0)  
+nread = read(fd, pbuf, left);  
+if(nread < 0)  
 {  
 if(errno == EINTR)        //遇到终端则继续  
 continue;  
 return -1;  
 }  
-else if(ret == 0)  
+else if(nread == 0)  
 {  
-return len - left;//对等方结束发送  
+break;//对等方结束发送  
 }  
-left -= ret;  
-pbuf += ret;  
+left -= nread;  
+pbuf += nread;  
 }  
-return len;  
+return len - left;  
 }  
   
   
-size_t writen(int fd, void *buf, size_t len)  
+ssize_t writen(int fd, void *buf, size_t len)  
 {  
 size_t left = len;  
-int ret;  
+ssize_t nwrite;  
 char *pbuf = (char *)buf;  
   
   
 while(left > 0)  
 {  
-ret = write(fd, pbuf, left);  
-if(ret < 0)  
+nwrite = write(fd, pbuf, left);  
+if(nwrite <= 0)  
 {  
-if (errno == EINTR)  
-continue;  
-return 1;  
-}  
-else if(ret == 0)  
-{  
-continue; // 没有写入，则继续  
-}  
-left -= ret;  
-pbuf += ret;  
+if (nwrite < 0 && errno == EINTR)  
+nwrite = 0;  
+else 
+return -1;  
+}
+left -= nwrite;  
+pbuf += nwrite;  
 }  
 return len;  
 }  
